@@ -2,45 +2,75 @@
 % Please edit documentation in R/RCloudConvert.R
 \name{convert_file}
 \alias{convert_file}
-\title{To convert file to other format}
+\title{convert_file}
 \usage{
-convert_file(api_key, input_format, output_format, input, file, dest_file,
-  input_s3_accesskeyid = "", input_s3_secretaccesskey = "",
-  input_s3_bucket = "", input_ftp_host = "", input_ftp_port = "",
-  input_ftp_user = "", input_ftp_password = "")
+convert_file(
+  api_key,
+  input_format,
+  output_format,
+  input,
+  file,
+  dest_file,
+  input_s3_accesskeyid = NA_character_,
+  input_s3_secretaccesskey = NA_character_,
+  input_s3_bucket = NA_character_,
+  input_s3_region = NA_character_,
+  input_ftp_host = NA_character_,
+  input_ftp_port = NA_character_,
+  input_ftp_user = NA_character_,
+  input_ftp_password = NA_character_
+)
 }
 \arguments{
-\item{api_key}{CloudConvert API key}
+\item{api_key}{CloudConvert V2 API key.}
 
-\item{input_format}{The format of the input file}
+\item{input_format}{The format of the input file.}
 
-\item{output_format}{The format the file should be converted to}
+\item{output_format}{The format the file should be converted to.}
 
-\item{input}{Set the method of uploading the input file}
+\item{input}{Set the method of uploading the input file. Possible}
 
-\item{file}{Input file destination (including the name of file with extension)}
+\item{file}{Input file destination (including the name of file with
+extension).}
 
-\item{dest_file}{Name where the downloaded file is saved (including the name of file with extension)}
+\item{dest_file}{Name where the downloaded file is saved (including the name
+of file with extension).}
 
-\item{input_s3_accesskeyid}{The Amazon S3 accessKeyId (Required when input is s3)}
+\item{input_s3_accesskeyid}{The Amazon S3 accessKeyId (Required when input is
+s3).}
 
-\item{input_s3_secretaccesskey}{The Amazon S3 secretAccessKey (Required when input is s3)}
+\item{input_s3_secretaccesskey}{The Amazon S3 secretAccessKey (Required when
+input is s3).}
 
-\item{input_s3_bucket}{The Amazon S3 bucket where to download the input file or upload the output file (Required when input is s3)}
+\item{input_s3_bucket}{The Amazon S3 bucket where to download the input file
+or upload the output file (Required when input is s3).}
 
-\item{input_ftp_host}{The FTP server host (Required when input is ftp)}
+\item{input_ftp_host}{The FTP server host (Required when input is ftp).}
 
-\item{input_ftp_port}{The port the FTP server is bind to (Required when input is ftp)}
+\item{input_ftp_port}{The port the FTP server is bind to (Required when input
+is ftp).}
 
-\item{input_ftp_user}{FTP username (Required when input is ftp)}
+\item{input_ftp_user}{FTP username (Required when input is ftp).}
 
-\item{input_ftp_password}{FTP password (Required when input is ftp)}
+\item{input_ftp_password}{FTP password (Required when input is ftp).}
 }
 \description{
-To convert file to other format
+convert_file
+}
+\details{
+converts a specified file -- either on a local machine, uploaded to
+an s3 bucket, or in an FTP server -- using CloudConvert's V2 API.
 }
 \examples{
 \dontrun{
-convert_file(api_key=api_key,input_format = "jpg",output_format = "pdf",input="upload",file="input file location",dest_file = "destination file location")
+convert_file(api_key=api_key,
+             input_format = "jpg",
+             output_format = "pdf",
+             input="upload",
+             file="input file location",
+             dest_file = "destination file location")
 }
+parse initial input options
+previous function only supported these options, though there are a few we
+can support later down the line
 }

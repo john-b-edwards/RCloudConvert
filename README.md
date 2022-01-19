@@ -1,17 +1,16 @@
 # RCloudConvert
-[![Travis-CI Build Status](https://travis-ci.org/mukul13/RCloudConvert.svg?branch=master)](https://travis-ci.org/mukul13/RCloudConvert)
 
-R package to convert file format using Cloud Convert API 
+R package to convert file format using Cloud Convert API, updated to work with
+the V2 API.
 
 ## Installation
 
-To install RCloudConvert package
+You can install RCloudConvert from GitHub using devtools:
 ```R
 #install.packages('devtools')
-library(devtools)
-install_github("mukul13/RCloudConvert")
+devtools::install_github("john_b_edwards/RCloudConvert")
 ```
-To get Cloud Convert API key, you have to sign up [here](https://cloudconvert.com/)
+To get Cloud Convert API key, you have to sign up [here.](https://cloudconvert.com/)
 
 ## Examples
 
@@ -33,10 +32,5 @@ convert_file(api_key,input_format = "input file format",output_format = "output 
 ```
 
 ## Resources
-* [API Documentation](https://cloudconvert.com/apidoc)
-* [Conversion Types](https://cloudconvert.com/apidoc#types)
-* [CloudConvert Blog](https://cloudconvert.com/blog/)
-
-### Note
-
-There is a daily limit of 25 conversion minutes. To extend this limit, you can buy prepaid packages.
+* [API Documentation](https://cloudconvert.com/api/v2#overview)
+* [Conversion Types](https://cloudconvert.com/api/v2/convert#convert-formats)
