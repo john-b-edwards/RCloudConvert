@@ -8,7 +8,7 @@ the V2 API.
 You can install RCloudConvert from GitHub using devtools:
 ```R
 #install.packages('devtools')
-devtools::install_github("john_b_edwards/RCloudConvert")
+devtools::install_github("john-b-edwards/RCloudConvert")
 ```
 To get a Cloud Convert API key, you have to sign up [here.](https://cloudconvert.com/)
 
