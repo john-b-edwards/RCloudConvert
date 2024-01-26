@@ -34,117 +34,123 @@
 #'              dest_file = "destination file location")
 #' }
 
-convert_file = function(api_key,
-                        input_format,
-                        output_format,
-                        input,
-                        file,
-                        dest_file,
-                        input_s3_accesskeyid = NA_character_,
-                        input_s3_secretaccesskey = NA_character_,
-                        input_s3_bucket = NA_character_,
-                        input_s3_region = NA_character_,
-                        input_ftp_host = NA_character_,
-                        input_ftp_port = NA_character_,
-                        input_ftp_user = NA_character_,
-                        input_ftp_password = NA_character_)
+convert_file = function (api_key,
+                         input_format,
+                         output_format,
+                         input,
+                         file,
+                         dest_file,
+                         input_s3_accesskeyid = NA_character_,
+                         input_s3_secretaccesskey = NA_character_,
+                         input_s3_bucket = NA_character_,
+                         input_s3_region = NA_character_,
+                         input_ftp_host = NA_character_,
+                         input_ftp_port = NA_character_,
+                         input_ftp_user = NA_character_,
+                         input_ftp_password = NA_character_)
 {
   #' parse initial input options
   #' previous function only supported these options, though there are a few we
   #' can support later down the line
-  if (toupper(input) %in% c('DOWNLOAD', 'URL')) {
-    import = list(operation = 'import/url',
-                  file = file)
-  } else if (toupper(input) %in% c('UPLOAD')) {
-    import = list(operation = 'import/upload')
-  } else if (toupper(input) %in% c('S3')) {
+  if (toupper(input) %in% c("DOWNLOAD", "URL")) {
+    import = list(operation = "import/url", file = file)
+  }
+  else if (toupper(input) %in% c("UPLOAD")) {
+    import = list(operation = "import/upload")
+  }
+  else if (toupper(input) %in% c("S3")) {
     import = list(
-      operation = 'import/s3',
+      operation = "import/s3",
       access_key_id = input_s3_accesskeyid,
       secret_access_key = input_s3_secretaccesskey,
       bucket = input_s3_bucket,
       region = input_s3_region,
       filename = file
-
     )
-  } else if (toupper(input) %in% c('FTP')) {
+  }
+  else if (toupper(input) %in% c("FTP")) {
     import = list(
-      operation = 'import/sftp',
+      operation = "import/sftp",
       host = input_ftp_host,
       username = input_ftp_user,
       file = file
     )
-  } else {
-    cli::cli_abort('Please ensure `input` is one of "URL", "Upload", "s3", or "FTP".')
+  }
+  else {
+    cli::cli_abort("Please ensure `input` is one of \"URL\", \"Upload\", \"s3\", or \"FTP\".")
   }
   # parse optional arguments
-  if (toupper(input) %in% c('FTP') & !is.na(input_ftp_port)) {
+  if (toupper(input) %in% c("FTP") & !is.na(input_ftp_port)) {
     import[[length(import) + 1]] <- input_ftp_port
     names(import)[[length(import)]] <- "port"
   }
-  if (toupper(input) %in% c('FTP') & !is.na(input_ftp_port)) {
+  if (toupper(input) %in% c("FTP") & !is.na(input_ftp_port)) {
     import[[length(import) + 1]] <- input_ftp_password
     names(import)[[length(import)]] <- "password"
   }
   # create job
-  r <- httr::POST(
-    'https://api.cloudconvert.com/v2/jobs',
-    httr::add_headers(
-      Authorization = glue::glue('Bearer {api_key}'),
-      `content-type` = 'application/json'
-    ),
-    body = list(tasks = list(
-      import = import,
-      convert = list(
-        operation = "convert",
-        input = "import",
-        input_format = tolower(input_format),
-        output_format = tolower(output_format)
+  r <-
+    httr::POST(
+      "https://api.cloudconvert.com/v2/jobs",
+      httr::add_headers(
+        Authorization = glue::glue("Bearer {api_key}"),
+        `content-type` = "application/json"
       ),
-      export = list(operation = "export/url",
-                    input = "convert")
-    )),
-    encode = "json"
-  )
+      body = list(tasks = list(
+        import = import,
+        convert = list(
+          operation = "convert",
+          input = "import",
+          input_format = tolower(input_format),
+          output_format = tolower(output_format)
+        ),
+        export = list(operation = "export/url", input = "convert")
+      )),
+      encode = "json"
+    )
   # grab and store job id so we can access it again later
   job_id <- httr::content(r)$data$id
   # if uploading, upload file
-  if (toupper(input) %in% c('UPLOAD')) {
-    # grab the upload task id
+  if (toupper(input) %in% c("UPLOAD")) {
     upload_task_id <- httr::content(r)$data$tasks[[1]]$id
-    # grab the upload form
+    # grab the upload task id
     r <-
       httr::GET(
         glue::glue(
-          'https://api.cloudconvert.com/v2/tasks/{upload_task_id}'
+          "https://api.cloudconvert.com/v2/tasks/{upload_task_id}"
         ),
-        httr::add_headers(Authorization = glue::glue('Bearer {api_key}'))
+        httr::add_headers(Authorization = glue::glue("Bearer {api_key}"))
       )
+    # grab the upload form
     form <- httr::content(r)$data$result$form
     port_url <- form$url
     params <- form$parameters
     # add the file to the upload form
     params[[length(params) + 1]] <- httr::upload_file(file)
     names(params)[[length(params)]] <- "file"
-    # post file
-    r <- httr::POST(port_url,
-                    httr::add_headers(Authorization = glue::glue('Bearer {api_key}')),
-                    body = params)
-    # check for any errors (so if cloud convert is down, throws an informative error here)
+    
+    # Remove the Authorization header for the POST request to S3
+    r <- httr::POST(port_url, body = params)
+    
     if (r$status_code != 201) {
-      cli::cli_abort('Problem uploading file to CloudConvert: HTTP Status {r$status_code}.')
+      stop(
+        "Problem uploading file to CloudConvert's storage: HTTP Status ",
+        r$status_code,
+        ". Response: ",
+        httr::content(r, "text"),
+        call. = FALSE
+      )
     }
+    
   }
-
   # fetch the job with the /wait endpoint, will wait until the job is done before processing
   r <-
     httr::GET(
-      glue::glue('https://api.cloudconvert.com/v2/jobs/{job_id}/wait'),
-      httr::add_headers(Authorization = glue::glue('Bearer {api_key}'))
+      glue::glue("https://api.cloudconvert.com/v2/jobs/{job_id}/wait"),
+      httr::add_headers(Authorization = glue::glue("Bearer {api_key}"))
     )
   # grab file url on cloudconvert
-  file_url <-
-    httr::content(r)$data$tasks[[1]]$result$files[[1]]$url
+  file_url <- httr::content(r)$data$tasks[[1]]$result$files[[1]]$url
   # download file
   download.file(url = file_url,
                 destfile = dest_file,
